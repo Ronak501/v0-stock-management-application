@@ -26,13 +26,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/verify');
+        const response = await fetch('/api/auth/verify', {
+          signal: AbortSignal.timeout(5000),
+        });
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        // Silently fail if verification endpoint is not available
+        // This allows the app to load even without database connection
+        console.debug('Auth check unavailable:', error);
       } finally {
         setLoading(false);
       }
